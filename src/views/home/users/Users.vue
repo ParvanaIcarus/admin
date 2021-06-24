@@ -1,6 +1,11 @@
 <template>
   <div>
     <!-- 卡片 -->
+    <el-breadcrumb separator-class="el-icon-arrow-right">
+      <el-breadcrumb-item>首页</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+    </el-breadcrumb>
     <el-card>
       <!-- 第一行的搜索框與添加按鈕 -->
       <el-row>
@@ -42,7 +47,6 @@
           </el-table-column>
         </el-table>
       </template>
-      <!-- 分頁器 -->
       <el-row>
         <!-- 分頁器 -->
         <el-col>
@@ -58,7 +62,9 @@
         </el-col>
       </el-row>
     </el-card>
+    <!-- 權限dialog -->
     <new-roles ref="rolesChange" :rolesList="rolesList" :current="current"></new-roles>
+    <!-- 增加或者修改users dialog -->
     <change-roles :isEdit="isEdit" ref="userChange" :current="current"></change-roles>
   </div>
 </template>
@@ -77,10 +83,6 @@ export default {
   name: 'Users',
   data() {
     return {
-      // 當前角色
-      currRoles: '',
-      // 當前用戶
-      currUsers: '',
       // 是否編輯
       isEdit: '',
       // 列表數據

@@ -73,3 +73,32 @@ export const reqRolesList = () =>
   request({
     url: 'roles',
   })
+
+// 編輯角色 roles/:id   put
+export const reqRoles = ({ id, roleName, roleDesc }) =>
+  request({
+    url: 'roles/' + id,
+    method: 'put',
+    data: {
+      roleName,
+      roleDesc,
+    },
+  })
+
+// 添加角色 roles post
+export const reqAddRoles = ({ roleName, roleDesc }) =>
+  request({
+    url: 'roles',
+    method: 'post',
+    data: {
+      roleName,
+      roleDesc,
+    },
+  })
+
+// 刪除角色 roles/:id delete
+export const reqDelRoles = (id) =>
+  request({
+    url: 'roles/' + id,
+    method: 'delete',
+  })

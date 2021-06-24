@@ -8,7 +8,10 @@
       <el-button type="info" @click="logOut">退出</el-button>
     </el-header>
     <el-container>
+      <!-- 側邊欄 -->
       <el-aside :width="ifcollapse ? '64px':'200px'">
+        <div class="btnToggle" @click="btnToggle">|||</div>
+        <!-- 菜單欄 -->
         <el-menu
           background-color="#333744"
           text-color="#fff"
@@ -38,11 +41,6 @@
         </el-menu>
       </el-aside>
       <el-main>
-        <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item>首页</el-breadcrumb-item>
-          <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-          <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-        </el-breadcrumb>
         <router-view></router-view>
       </el-main>
     </el-container>
@@ -142,26 +140,9 @@ export default {
     }
   }
 }
-
-// .el-container {
-//   height: 100%;
-//   .el-aside {
-//     background: #373d41;
-//     height: 100%;
-//     .el-menu-vertical-demo {
-//       border-right: none;
-//     }
-//     .el-menu-item {
-//       padding-left: 50px;
-//     }
-//     .el-submenu__title {
-//       font-size: 14px;
-//       i {
-//         margin-right: 10px;
-//       }
-//     }
-//   }
-// }
+.iconfont {
+  margin-left: -20px;
+}
 .btnToggle {
   font-size: 10px;
   color: white;
