@@ -102,3 +102,20 @@ export const reqDelRoles = (id) =>
     url: 'roles/' + id,
     method: 'delete',
   })
+
+// 角色授權 roles/:roleId/rights post
+export const reqRolesRights = (roleId, rids) =>
+  request({
+    url: 'roles/' + roleId + '/rights',
+    method: 'post',
+    data: {
+      rids,
+    },
+  })
+
+// 刪除角色指定權限 roles/:roleId/rights/:rightId delete
+export const reqDelRolesRights = (roleId, rightId) =>
+  request({
+    url: `roles/${roleId}/rights/${rightId}`,
+    method: 'delete',
+  })

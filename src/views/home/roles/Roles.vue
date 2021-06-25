@@ -3,7 +3,7 @@
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item>首页</el-breadcrumb-item>
       <el-breadcrumb-item>权限管理</el-breadcrumb-item>
-      <el-breadcrumb-item>权限列表</el-breadcrumb-item>
+      <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card>
       <el-button type="primary" @click="show('add')">添加角色</el-button>
@@ -17,7 +17,7 @@
               :class="{'t_border':index == 0,'b-border':true}"
             >
               <el-col :span="4">
-                <el-tag closable>{{item.authName}}</el-tag>
+                <el-tag closable @close="tagClose(item.id,row)">{{item.authName}}</el-tag>
                 <i class="el-icon-caret-right"></i>
               </el-col>
               <el-col :span="20">
@@ -57,61 +57,47 @@
         </el-table-column>
       </el-table>
     </el-card>
-    <el-dialog
-      :title="edit?'編輯角色':'添加角色'"
-      :visible.sync="dialogVisible"
-      width="50%"
-      @close="closeClick"
-    >
-      <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-        <el-form-item label="角色名稱" prop="roleName">
-          <el-input v-model="form.roleName"></el-input>
-        </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="form.roleDesc"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submit">确 定</el-button>
-      </span>
-    </el-dialog>
+    <!-- 編輯角色 添加角色 dialog -->
+    <change-roles ref="changeRolesDialog" :edit="edit"></change-roles>
+    <!-- 分配權限的 dialog -->
+    <allot-roles ref="allot" :RolesList="RolesList" :current="current"></allot-roles>
   </div>
 </template>
 <script>
-import { reqRolesList, reqRoles, reqAddRoles, reqDelRoles } from 'network/api'
+import {
+  reqRolesList,
+  reqDelRoles,
+  reqRights,
+  reqDelRolesRights,
+} from 'network/api'
+import changeRoles from './childcom/changeRoles'
+import allotRoles from './childcom/allotRoles'
 export default {
+  components: { changeRoles, allotRoles },
   data() {
     return {
       rightList: [],
-      dialogVisible: false,
-      // 表單驗證
-      form: {},
-      rules: {
-        roleName: {
-          required: true,
-          message: '請輸入角色名稱',
-          trigger: 'blur',
-        },
-        roleDesc: {
-          required: true,
-          message: '請輸入角色描述',
-          trigger: 'blur',
-        },
-      },
       // 中間變量 false 為
       edit: false,
+      RolesList: [],
+      RolesListCopy: [],
+      current: [],
+      arr: [],
     }
   },
   props: {},
   created() {
     this.getRolesList()
+    this.getRolesAllList()
   },
   methods: {
-    // 關閉了dialog
-    closeClick() {
-      this.$refs.form.resetFields()
-      this.form = {}
+    // 單個權限的刪除功能
+    async tagClose(rightId, row) {
+      let { id: roleId } = row //角色id
+      const { meta, data } = await reqDelRolesRights(roleId, rightId)
+      if (meta.status !== 200) return this.$message.error(meta.msg)
+      row.children = data
+      this.$message.success(meta.msg)
     },
     // 顯示dialog 並且使edit更改
     show(type, row) {
@@ -120,12 +106,12 @@ export default {
         // 編輯
         this.edit = true
         const { id, roleDesc, roleName } = row
-        this.form = { id, roleDesc, roleName }
+        this.$refs.changeRolesDialog.form = { id, roleDesc, roleName }
       } else {
         // 添加
         this.edit = false
       }
-      this.dialogVisible = true
+      this.$refs.changeRolesDialog.dialogVisible = true
     },
     // 刪除
     async del({ id }) {
@@ -143,35 +129,23 @@ export default {
       this.$message.success('刪除成功')
       this.getRolesList()
     },
-    // 確認
-    submit() {
-      this.$refs.form.validate(async (value) => {
-        if (value) {
-          if (this.edit) {
-            //  編輯
-            // let { id, roleDesc, roleName } = this.form
-            const { meta } = await reqRoles(this.form)
-            if (meta.status !== 200) return this.$message.error(meta.msg)
-            this.$message.success(meta.msg)
-            this.getRolesList()
-          } else {
-            // 添加
-            // let { roleName, roleDesc } = this.form
-            const { meta } = await reqAddRoles(this.form)
-            if (meta.status !== 201) return this.$message.error(meta.msg)
-            this.$message.success(meta.msg)
-            this.getRolesList()
-          }
-        }
-      })
-      this.dialogVisible = false
-    },
     // 分配權限
-    open(row) {},
+    open(row) {
+      this.RolesList = this.RolesListCopy
+      this.current = row
+      // 調用子組件裡的方法。製作選中的列表
+      this.$refs.allot.test(this.current, this.$refs.allot.keyList)
+      this.$refs.allot.dialogVisible = true
+    },
     // 獲得一級列表並且渲染頁面
     async getRolesList() {
       const { data } = await reqRolesList()
       this.rightList = data
+    },
+    // 獲取樹狀權限列表
+    async getRolesAllList() {
+      const { data } = await reqRights('tree')
+      this.RolesListCopy = data
     },
   },
 }
